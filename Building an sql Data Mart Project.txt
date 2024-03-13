@@ -1,0 +1,51 @@
+--Create Schema 
+CREATE SCHEMA [CredDataMart];
+GO
+
+--Dimension Tables 
+CREATE TABLE [dbo].[Customer] (
+  CustomerID INT PRIMARY KEY,
+  CustomerName VARCHAR(255),
+  CustomerSegment VARCHAR(50),
+  Country VARCHAR(50)
+);
+
+CREATE TABLE [dbo].[Product] (
+  ProductID INT PRIMARY KEY,
+  ProductName VARCHAR(255),
+  ProductCategory VARCHAR(50),
+  Brand VARCHAR(50)
+);
+
+--Fact Table 
+CREATE TABLE [dbo].[SalesFact] (
+  SalesID INT PRIMARY KEY,
+  CustomerID INT FOREIGN KEY REFERENCES [dbo].[Customer](CustomerID),
+  ProductID INT FOREIGN KEY REFERENCES [dbo].[Product](ProductID),
+  SaleDate DATE,
+  SalesAmount DECIMAL(10,2),
+  Quantity INT
+);
+
+--Populate Dimension Tables 
+INSERT INTO [dbo].[Customer] (CustomerID, CustomerName, CustomerSegment, Country)
+SELECT CustomerID, CustomerName, CustomerSegment, Country
+FROM dbo.CustomerTable;
+
+INSERT INTO [dbo].[Product] (ProductID, ProductName, ProductCategory, Brand)
+SELECT ProductID, ProductName, ProductCategory, Brand
+FROM dbo.ProductTable;
+
+--Populate Fact Table 
+INSERT INTO [dbo].[SalesFact] (SalesID, CustomerID, ProductID, SaleDate, SalesAmount, Quantity)
+SELECT SalesID, CustomerID, ProductID, SaleDate, SalesAmount, Quantity
+FROM dbo.SalesTable
+WHERE SaleDate BETWEEN '2023-01-01' AND '2023-12-31';  
+
+--Dimension and Fact Table Relationships (if applicable)
+CREATE INDEX IX_SalesFact_CustomerID ON [dbo].[SalesFact](CustomerID);
+CREATE INDEX IX_SalesFact_ProductID ON [dbo].[SalesFact](ProductID);
+
+-- 7. Views or Additional Tables (optional)
+-- You can create views or additional tables based on your specific needs
+
